@@ -2,3 +2,5 @@
 .Rproj.user/
 .RHistory
 .Rdata
+
+*.html
