@@ -12,53 +12,46 @@ This notebook contains a demonstration of the use of a user defiend function to 
 ## 1.
 ### *Create a function that accepts (1) a quantitative response variable, (2) a quantitative explanatory variable, and (3) a number. Suppose we denote the response variable as y, the explanatory variable as x, and the number as p. Your function should model y as a linear function of x and then for each (x,y) pair determine if the residual is one of the p largest in the set of the residuals, with lagest defined in terms of the absolute value (i.e. a residual of -10 is just as large as a residual of 10). The function should return a logical vector indicating TRUE for each pair that has one of the pth largest residuals and FALSE otherwise.*
 
-x = explanatory variable,
-y = response variable,
-p = a number
-
-```{r}
+```{r echo=TRUE}
 regress.residuals <-function(x, y, p) {
-  res.model <- lm(y~x)
-  abs.res <- abs(res.model$residuals)
-  sort.res <- sort(abs.res$residuals, decreasing = TRUE)
-  cutoff <- sort.res[p]
-  logical.res <- (abs.res >= cutoff)
-  return(logical.res)
+  residual.model <- lm(y~x)
+  absolute <- abs(residual.model$residuals)
+  sort.residuals <- sort(absolute, decreasing = TRUE)
+  cutoff <- sort.residuals[p]
+  logical.residuals <- (absolute >= cutoff)
+  return(logical.residuals)
 }
+```
+
+
+```{r include=FALSE}
+library(here)
+```
+
+```{r include=FALSE}
+professor <-read.csv(here("Data","Salaries.csv"))
+```
+
+
+```{r include=FALSE}
+#10% of the highest residuals
+p <- round(0.1*(nrow(professor)))
 ```
 
 ## 2.
 ### *Obtain a real data set with quantitative response and explanatory variables (n>=50). Plot these on a scatterplot with a regression line. Use your function to help you highlight the 10% largest residuals on the scatterplot.*
-
-```{r echo=FALSE}
-library(here)
-professor <- read.csv(here("Data","Salaries.csv"))
-
-#10% of the largest residuals
-p <- round(0.1*(nrow(professor)))
-
-#Linear Regression Model
-model <-regress.residuals(professor$salary, professor$yrs.since.phd, 20)
-
-#Correlation
-cor <- cor(professor$salary, professor$yrs.since.phd)
-
-#Determine which residuals are largest 
-residuals <- lm(professor$salary ~ professor$yrs.since.phd)
-residuals
-
+```{r include=FALSE}
+# This is a vector of logicals that flags the 10% highest residuals for the relationship between salary and years since phd
+highest.tenth <-regress.residuals(professor$phd,professor$salary,p)
 ```
 
-
-
-### The relationship of years since obtaining a PhD and salary 
 ```{r echo=FALSE}
-plot(professor$salary, professor$yrs.since.phd,
+plot(professor$phd, professor$salary,
      main = "Relationship between Years Since Obtaining a PhD and Salary",
      xlab = "Years Since PhD",
      ylab = "Salary",
-     col = ifelse(model == TRUE, "purple","black"),
-     pch = ifelse(model == TRUE, 15, 0))
-
-abline(residuals)
+     col = ifelse(highest.tenth, "purple","black"))
+model <- lm(professor$salary~professor$phd)
+abline(model)
+model
 ```
